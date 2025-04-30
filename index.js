@@ -85,7 +85,7 @@ const flappyBird = {
   gravity: 0.25,
   speed: 0,
   update() {
-    flappyBird.speed = flappyBird.speed * flappyBird.gravity;
+    flappyBird.speed = flappyBird.speed + flappyBird.gravity;
     flappyBird.y = flappyBird.y + flappyBird.speed;
   },
   draw() {
