@@ -103,13 +103,70 @@ const flappyBird = {
   },
 };
 
-function loop() {
-  background.draw();
-  ground.draw();
-  flappyBird.update();
-  flappyBird.draw();
+const startScreen = {
+  sX: 134,
+  sY: 0,
+  w: 174,
+  h: 152,
+  x: canvas.width / 2 - 174 / 2,
+  y: 50,
+  draw() {
+    context.drawImage(
+      sprites,
+      startScreen.sX,
+      startScreen.sY,
+      startScreen.w,
+      startScreen.h,
+      startScreen.x,
+      startScreen.y,
+      startScreen.w,
+      startScreen.h
+    );
+  },
+};
 
+let activeScreen = {};
+
+function changeScreen(newScreen) {
+  activeScreen = newScreen;
+}
+
+const SCREENS = {
+  START: {
+    draw() {
+      background.draw();
+      ground.draw();
+      flappyBird.draw();
+      startScreen.draw();
+    },
+    click() {
+      changeScreen(SCREENS.GAME);
+    },
+    update() {},
+  },
+  GAME: {
+    draw() {
+      background.draw();
+      ground.draw();
+      flappyBird.draw();
+    },
+    update() {
+      flappyBird.update();
+    },
+  },
+};
+
+function loop() {
+  activeScreen.draw();
+  activeScreen.update();
   requestAnimationFrame(loop);
 }
 
+window.addEventListener("click", function () {
+  if (activeScreen.click) {
+    activeScreen.click();
+  }
+});
+
+changeScreen(SCREENS.START);
 loop();
