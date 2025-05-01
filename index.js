@@ -84,6 +84,9 @@ const flappyBird = {
   y: 50,
   gravity: 0.25,
   speed: 0,
+  jump() {
+    flappyBird.speed = - 4.6;
+  },
   update() {
     flappyBird.speed = flappyBird.speed + flappyBird.gravity;
     flappyBird.y = flappyBird.y + flappyBird.speed;
@@ -149,6 +152,9 @@ const SCREENS = {
       background.draw();
       ground.draw();
       flappyBird.draw();
+    },
+    click() {
+      flappyBird.jump();
     },
     update() {
       flappyBird.update();
