@@ -198,3 +198,4 @@ window.addEventListener("click", function () {
 
 changeScreen(SCREENS.START);
 loop();
+
