@@ -41,44 +41,54 @@ const background = {
   },
 };
 
-const ground = {
-  spriteX: 0,
-  spriteY: 610,
-  width: 224,
-  height: 112,
-  x: 0,
-  y: canvas.height - 112,
-  draw() {
-    context.drawImage(
-      sprites,
-      ground.spriteX,
-      ground.spriteY,
-      ground.width,
-      ground.height,
-      ground.x,
-      ground.y,
-      ground.width,
-      ground.height
-    );
-
-    context.drawImage(
-      sprites,
-      ground.spriteX,
-      ground.spriteY,
-      ground.width,
-      ground.height,
-      ground.x + ground.width,
-      ground.y,
-      ground.width,
-      ground.height
-    );
-  },
-};
-
 function hasCollision(flappyBird, ground) {
   const flappyBirdY = flappyBird.y + flappyBird.height;
   const groundY = ground.y;
   return flappyBirdY >= groundY;
+}
+
+function createGround() {
+  const ground = {
+    spriteX: 0,
+    spriteY: 610,
+    width: 224,
+    height: 112,
+    x: 0,
+    y: canvas.height - 112,
+    update() {
+      const groundMovement = 1;
+      const repeat = ground.width /2;
+      movement = ground.x - groundMovement;
+      ground.x = movement % repeat;
+    },
+    draw() {
+      context.drawImage(
+        sprites,
+        ground.spriteX,
+        ground.spriteY,
+        ground.width,
+        ground.height,
+        ground.x,
+        ground.y,
+        ground.width,
+        ground.height
+      );
+
+      context.drawImage(
+        sprites,
+        ground.spriteX,
+        ground.spriteY,
+        ground.width,
+        ground.height,
+        ground.x + ground.width,
+        ground.y,
+        ground.width,
+        ground.height
+      );
+    },
+  };
+
+  return ground;
 }
 
 function createFlappyBird() {
@@ -148,7 +158,7 @@ let activeScreen = {};
 function changeScreen(newScreen) {
   activeScreen = newScreen;
 
-  if(newScreen.starts) {
+  if (newScreen.starts) {
     newScreen.starts();
   }
 }
@@ -157,22 +167,25 @@ const SCREENS = {
   START: {
     starts() {
       globals.flappyBird = createFlappyBird();
+      globals.ground = createGround();
     },
     draw() {
       background.draw();
-      ground.draw();
+      globals.ground.draw();
       globals.flappyBird.draw();
       startScreen.draw();
     },
     click() {
       changeScreen(SCREENS.GAME);
     },
-    update() {},
+    update() {
+      globals.ground.update();
+    },
   },
   GAME: {
     draw() {
       background.draw();
-      ground.draw();
+      globals.ground.draw();
       globals.flappyBird.draw();
     },
     click() {
@@ -198,4 +211,3 @@ window.addEventListener("click", function () {
 
 changeScreen(SCREENS.START);
 loop();
-
