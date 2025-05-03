@@ -1,3 +1,4 @@
+let frames = 0;
 const sprites = new Image();
 sprites.src = "./sprites.png";
 
@@ -41,44 +42,54 @@ const background = {
   },
 };
 
-const ground = {
-  spriteX: 0,
-  spriteY: 610,
-  width: 224,
-  height: 112,
-  x: 0,
-  y: canvas.height - 112,
-  draw() {
-    context.drawImage(
-      sprites,
-      ground.spriteX,
-      ground.spriteY,
-      ground.width,
-      ground.height,
-      ground.x,
-      ground.y,
-      ground.width,
-      ground.height
-    );
-
-    context.drawImage(
-      sprites,
-      ground.spriteX,
-      ground.spriteY,
-      ground.width,
-      ground.height,
-      ground.x + ground.width,
-      ground.y,
-      ground.width,
-      ground.height
-    );
-  },
-};
-
 function hasCollision(flappyBird, ground) {
   const flappyBirdY = flappyBird.y + flappyBird.height;
   const groundY = ground.y;
   return flappyBirdY >= groundY;
+}
+
+function createGround() {
+  const ground = {
+    spriteX: 0,
+    spriteY: 610,
+    width: 224,
+    height: 112,
+    x: 0,
+    y: canvas.height - 112,
+    update() {
+      const groundMovement = 1;
+      const repeat = ground.width / 2;
+      movement = ground.x - groundMovement;
+      ground.x = movement % repeat;
+    },
+    draw() {
+      context.drawImage(
+        sprites,
+        ground.spriteX,
+        ground.spriteY,
+        ground.width,
+        ground.height,
+        ground.x,
+        ground.y,
+        ground.width,
+        ground.height
+      );
+
+      context.drawImage(
+        sprites,
+        ground.spriteX,
+        ground.spriteY,
+        ground.width,
+        ground.height,
+        ground.x + ground.width,
+        ground.y,
+        ground.width,
+        ground.height
+      );
+    },
+  };
+
+  return ground;
 }
 
 function createFlappyBird() {
@@ -95,7 +106,7 @@ function createFlappyBird() {
       flappyBird.speed = -4.6;
     },
     update() {
-      if (hasCollision(flappyBird, ground)) {
+      if (hasCollision(flappyBird, globals.ground)) {
         changeScreen(SCREENS.START);
         flappyBird.y = 50;
         return;
@@ -103,11 +114,29 @@ function createFlappyBird() {
       flappyBird.speed = flappyBird.speed + flappyBird.gravity;
       flappyBird.y = flappyBird.y + flappyBird.speed;
     },
+    movements: [
+      { spriteX: 0, spriteY: 0 }, // wings up
+      { spriteX: 0, spriteY: 26 }, // wings middle
+      { spriteX: 0, spriteY: 52 }, // wings down
+    ],
+    actualFrame: 0,
+    updateFrame() {
+      const frameInterval = 10;
+      const passInterval = frames % frameInterval;
+      if(passInterval === 0){
+        const incrementBase = 1;
+        const increment = incrementBase + flappyBird.actualFrame;
+        const repeatBase = flappyBird.movements.length;
+        flappyBird.actualFrame = increment % repeatBase;
+      }
+    },
     draw() {
+      flappyBird.updateFrame();
+      const {spriteX, spriteY} = flappyBird.movements[flappyBird.actualFrame];
       context.drawImage(
         sprites,
-        flappyBird.spriteX,
-        flappyBird.spriteY,
+        spriteX,
+        spriteY,
         flappyBird.width,
         flappyBird.height,
         flappyBird.x,
@@ -148,7 +177,7 @@ let activeScreen = {};
 function changeScreen(newScreen) {
   activeScreen = newScreen;
 
-  if(newScreen.starts) {
+  if (newScreen.starts) {
     newScreen.starts();
   }
 }
@@ -157,22 +186,25 @@ const SCREENS = {
   START: {
     starts() {
       globals.flappyBird = createFlappyBird();
+      globals.ground = createGround();
     },
     draw() {
       background.draw();
-      ground.draw();
+      globals.ground.draw();
       globals.flappyBird.draw();
       startScreen.draw();
     },
     click() {
       changeScreen(SCREENS.GAME);
     },
-    update() {},
+    update() {
+      globals.ground.update();
+    },
   },
   GAME: {
     draw() {
       background.draw();
-      ground.draw();
+      globals.ground.draw();
       globals.flappyBird.draw();
     },
     click() {
@@ -187,6 +219,7 @@ const SCREENS = {
 function loop() {
   activeScreen.draw();
   activeScreen.update();
+  frames = frames + 1;
   requestAnimationFrame(loop);
 }
 
