@@ -1,3 +1,4 @@
+let frames = 0;
 const sprites = new Image();
 sprites.src = "./sprites.png";
 
@@ -57,7 +58,7 @@ function createGround() {
     y: canvas.height - 112,
     update() {
       const groundMovement = 1;
-      const repeat = ground.width /2;
+      const repeat = ground.width / 2;
       movement = ground.x - groundMovement;
       ground.x = movement % repeat;
     },
@@ -105,7 +106,7 @@ function createFlappyBird() {
       flappyBird.speed = -4.6;
     },
     update() {
-      if (hasCollision(flappyBird, ground)) {
+      if (hasCollision(flappyBird, globals.ground)) {
         changeScreen(SCREENS.START);
         flappyBird.y = 50;
         return;
@@ -113,11 +114,29 @@ function createFlappyBird() {
       flappyBird.speed = flappyBird.speed + flappyBird.gravity;
       flappyBird.y = flappyBird.y + flappyBird.speed;
     },
+    movements: [
+      { spriteX: 0, spriteY: 0 }, // wings up
+      { spriteX: 0, spriteY: 26 }, // wings middle
+      { spriteX: 0, spriteY: 52 }, // wings down
+    ],
+    actualFrame: 0,
+    updateFrame() {
+      const frameInterval = 10;
+      const passInterval = frames % frameInterval;
+      if(passInterval === 0){
+        const incrementBase = 1;
+        const increment = incrementBase + flappyBird.actualFrame;
+        const repeatBase = flappyBird.movements.length;
+        flappyBird.actualFrame = increment % repeatBase;
+      }
+    },
     draw() {
+      flappyBird.updateFrame();
+      const {spriteX, spriteY} = flappyBird.movements[flappyBird.actualFrame];
       context.drawImage(
         sprites,
-        flappyBird.spriteX,
-        flappyBird.spriteY,
+        spriteX,
+        spriteY,
         flappyBird.width,
         flappyBird.height,
         flappyBird.x,
@@ -200,6 +219,7 @@ const SCREENS = {
 function loop() {
   activeScreen.draw();
   activeScreen.update();
+  frames = frames + 1;
   requestAnimationFrame(loop);
 }
 
