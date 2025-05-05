@@ -59,7 +59,7 @@ function createGround() {
     update() {
       const groundMovement = 1;
       const repeat = ground.width / 2;
-      movement = ground.x - groundMovement;
+      const movement = ground.x - groundMovement;
       ground.x = movement % repeat;
     },
     draw() {
