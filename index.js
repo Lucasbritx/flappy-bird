@@ -223,15 +223,24 @@ function createPipe() {
 
       })
     },
-    pairs: [{
-      x: 100,
-      y: -150 * (Math.random() + 1),
-    }],
+    pairs: [],
     update() {
       const passed100frames = frames % 100 === 0;
       if(passed100frames){
-
+        pipe.pairs.push({
+          x: canvas.width,
+          y: -150 * (Math.random() + 1),
+        })
       }
+
+      pipe.pairs.forEach(function(pairs){
+        pairs.x = pairs.x - 2;
+
+        if(pairs.x + pipe.width <= 0) {
+          pipe.pairs.shift();
+        }
+      })
+
 
     }
   };
@@ -247,9 +256,9 @@ const SCREENS = {
     },
     draw() {
       background.draw();
-      globals.ground.draw();
       globals.flappyBird.draw();
       globals.pipe.draw();
+      globals.ground.draw();
       //startScreen.draw();
     },
     click() {
