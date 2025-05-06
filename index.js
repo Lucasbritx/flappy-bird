@@ -107,7 +107,7 @@ function createFlappyBird() {
     },
     update() {
       if (hasCollision(flappyBird, globals.ground)) {
-        changeScreen(SCREENS.START);
+        changeScreen(SCREENS.GAME_OVER);
         flappyBird.y = 50;
         return;
       }
@@ -168,6 +168,28 @@ const startScreen = {
       startScreen.y,
       startScreen.w,
       startScreen.h
+    );
+  },
+};
+
+const gameOverMessage = {
+  sX: 134,
+  sY: 153,
+  w: 226,
+  h: 200,
+  x: canvas.width / 2 - 226 / 2,
+  y: 50,
+  draw() {
+    context.drawImage(
+      sprites,
+      gameOverMessage.sX,
+      gameOverMessage.sY,
+      gameOverMessage.w,
+      gameOverMessage.h,
+      gameOverMessage.x,
+      gameOverMessage.y,
+      gameOverMessage.w,
+      gameOverMessage.h
     );
   },
 };
@@ -235,7 +257,7 @@ function createPipe() {
     hasCollisionWithFlappyBird(pair) {
       const flappyBirdHead = globals.flappyBird.y;
       const flappyBirdFeet = globals.flappyBird.y + globals.flappyBird.height;
-      if(globals.flappyBird.x >= pair.x) {
+      if(globals.flappyBird.x + globals.flappyBird.width >= pair.x) {
         if(flappyBirdHead <= pair.pipeSky.y) {
           return true;
         }
@@ -259,7 +281,7 @@ function createPipe() {
         pair.x = pair.x - 2;
 
         if(pipe.hasCollisionWithFlappyBird(pair)) {
-          changeScreen(SCREENS.START)
+          changeScreen(SCREENS.GAME_OVER)
         }
 
         if(pair.x + pipe.width <= 0) {
@@ -272,6 +294,28 @@ function createPipe() {
   };
   return pipe;
 };
+
+function createScore() {
+  const score = {
+    points: 0,
+    draw() {
+      context.font = '35px "VT323"';
+      context.textAlign = 'right';
+      context.fillStyle= "white";
+      context.fillText(`${score.points}`, canvas.width - 10, 35);
+    },
+    update(){
+      const frameInterval = 20;
+      const passInterval = frames % frameInterval;
+      if(passInterval) {
+        score.points = score.points + 1;
+      }
+    },
+
+  }
+
+  return score;
+}
 
 const SCREENS = {
   START: {
@@ -294,11 +338,15 @@ const SCREENS = {
     },
   },
   GAME: {
+    starts() {
+      globals.score = createScore();
+    },
     draw() {
       background.draw();
       globals.pipe.draw();
       globals.ground.draw();
       globals.flappyBird.draw();
+      globals.score.draw();
     },
     click() {
       globals.flappyBird.jump();
@@ -309,6 +357,15 @@ const SCREENS = {
       globals.flappyBird.update();
     },
   },
+  GAME_OVER: {
+    draw(){
+      gameOverMessage.draw();
+    },
+    update(){},
+    click(){
+      changeScreen(SCREENS.START);
+    }
+  }
 };
 
 function loop() {
