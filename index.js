@@ -380,11 +380,14 @@ function loop() {
   requestAnimationFrame(loop);
 }
 
-window.addEventListener("click", function () {
+function handleInteraction() {
   if (activeScreen.click) {
     activeScreen.click();
   }
-});
+}
+
+window.addEventListener("click", handleInteraction);
+window.addEventListener("touchstart", handleInteraction);
 
 changeScreen(SCREENS.START);
 loop();
