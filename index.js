@@ -123,7 +123,7 @@ function createFlappyBird() {
     updateFrame() {
       const frameInterval = 10;
       const passInterval = frames % frameInterval;
-      if(passInterval === 0){
+      if (passInterval === 0) {
         const incrementBase = 1;
         const increment = incrementBase + flappyBird.actualFrame;
         const repeatBase = flappyBird.movements.length;
@@ -132,7 +132,7 @@ function createFlappyBird() {
     },
     draw() {
       flappyBird.updateFrame();
-      const {spriteX, spriteY} = flappyBird.movements[flappyBird.actualFrame];
+      const { spriteX, spriteY } = flappyBird.movements[flappyBird.actualFrame];
       context.drawImage(
         sprites,
         spriteX,
@@ -217,51 +217,58 @@ function createPipe() {
       spriteY: 169,
     },
     space: 80,
-    
-    draw() {
-      pipe.pairs.forEach(function(pair){
-      const yRandom = pair.y;
-      const spaceBetweenPipes = 90;
 
-      const pipeSkyX = pair.x;
-      const pipeSkyY = yRandom;
+    draw() {
+      pipe.pairs.forEach(function (pair) {
+        const yRandom = pair.y;
+        const spaceBetweenPipes = 90;
+
+        const pipeSkyX = pair.x;
+        const pipeSkyY = yRandom;
         context.drawImage(
           sprites,
-          pipe.sky.spriteX, pipe.sky.spriteY,
-          pipe.width, pipe.height,
-          pipeSkyX, pipeSkyY,
-          pipe.width, pipe.height,
-        )
-  
+          pipe.sky.spriteX,
+          pipe.sky.spriteY,
+          pipe.width,
+          pipe.height,
+          pipeSkyX,
+          pipeSkyY,
+          pipe.width,
+          pipe.height
+        );
+
         const pipeGroundX = pair.x;
         const pipeGroundY = pipe.height + spaceBetweenPipes + yRandom;
         context.drawImage(
           sprites,
-          pipe.ground.spriteX, pipe.ground.spriteY,
-          pipe.width, pipe.height,
-          pipeGroundX, pipeGroundY,
-          pipe.width, pipe.height,
-        )
+          pipe.ground.spriteX,
+          pipe.ground.spriteY,
+          pipe.width,
+          pipe.height,
+          pipeGroundX,
+          pipeGroundY,
+          pipe.width,
+          pipe.height
+        );
 
         pair.pipeSky = {
           x: pipeSkyX,
           y: pipe.height + pipeSkyY,
-        }
+        };
         pair.groundPipe = {
           x: pipeGroundX,
           y: pipeGroundY,
-        }
-
-      })
+        };
+      });
     },
     hasCollisionWithFlappyBird(pair) {
       const flappyBirdHead = globals.flappyBird.y;
       const flappyBirdFeet = globals.flappyBird.y + globals.flappyBird.height;
-      if(globals.flappyBird.x + globals.flappyBird.width >= pair.x) {
-        if(flappyBirdHead <= pair.pipeSky.y) {
+      if (globals.flappyBird.x + globals.flappyBird.width >= pair.x) {
+        if (flappyBirdHead <= pair.pipeSky.y) {
           return true;
         }
-        if(flappyBirdFeet >= pair.groundPipe.y) {
+        if (flappyBirdFeet >= pair.groundPipe.y) {
           return true;
         }
       }
@@ -270,49 +277,46 @@ function createPipe() {
     pairs: [],
     update() {
       const passed100frames = frames % 100 === 0;
-      if(passed100frames){
+      if (passed100frames) {
         pipe.pairs.push({
           x: canvas.width,
           y: -150 * (Math.random() + 1),
-        })
+        });
       }
 
-      pipe.pairs.forEach(function(pair){
+      pipe.pairs.forEach(function (pair) {
         pair.x = pair.x - 2;
 
-        if(pipe.hasCollisionWithFlappyBird(pair)) {
-          changeScreen(SCREENS.GAME_OVER)
+        if (pipe.hasCollisionWithFlappyBird(pair)) {
+          changeScreen(SCREENS.GAME_OVER);
         }
 
-        if(pair.x + pipe.width <= 0) {
+        if (pair.x + pipe.width <= 0) {
           pipe.pairs.shift();
         }
-      })
-
-
-    }
+      });
+    },
   };
   return pipe;
-};
+}
 
 function createScore() {
   const score = {
     points: 0,
     draw() {
       context.font = '35px "VT323"';
-      context.textAlign = 'right';
-      context.fillStyle= "white";
+      context.textAlign = "right";
+      context.fillStyle = "white";
       context.fillText(`${score.points}`, canvas.width - 10, 35);
     },
-    update(){
+    update() {
       const frameInterval = 20;
-      const passInterval = frames % frameInterval;
-      if(passInterval) {
+      const passInterval = frames % frameInterval === 0;
+      if (passInterval) {
         score.points = score.points + 1;
       }
     },
-
-  }
+  };
 
   return score;
 }
@@ -355,17 +359,18 @@ const SCREENS = {
       globals.pipe.update();
       globals.ground.update();
       globals.flappyBird.update();
+      globals.score.update();
     },
   },
   GAME_OVER: {
-    draw(){
+    draw() {
       gameOverMessage.draw();
     },
-    update(){},
-    click(){
+    update() {},
+    click() {
       changeScreen(SCREENS.START);
-    }
-  }
+    },
+  },
 };
 
 function loop() {
