@@ -197,11 +197,11 @@ function createPipe() {
     space: 80,
     
     draw() {
-      pipe.pairs.forEach(function(pairs){
-      const yRandom = pairs.y;
+      pipe.pairs.forEach(function(pair){
+      const yRandom = pair.y;
       const spaceBetweenPipes = 90;
 
-      const pipeSkyX = pairs.x;
+      const pipeSkyX = pair.x;
       const pipeSkyY = yRandom;
         context.drawImage(
           sprites,
@@ -211,7 +211,7 @@ function createPipe() {
           pipe.width, pipe.height,
         )
   
-        const pipeGroundX = 220;
+        const pipeGroundX = pair.x;
         const pipeGroundY = pipe.height + spaceBetweenPipes + yRandom;
         context.drawImage(
           sprites,
@@ -221,7 +221,29 @@ function createPipe() {
           pipe.width, pipe.height,
         )
 
+        pair.pipeSky = {
+          x: pipeSkyX,
+          y: pipe.height + pipeSkyY,
+        }
+        pair.groundPipe = {
+          x: pipeGroundX,
+          y: pipeGroundY,
+        }
+
       })
+    },
+    hasCollisionWithFlappyBird(pair) {
+      const flappyBirdHead = globals.flappyBird.y;
+      const flappyBirdFeet = globals.flappyBird.y + globals.flappyBird.height;
+      if(globals.flappyBird.x >= pair.x) {
+        if(flappyBirdHead <= pair.pipeSky.y) {
+          return true;
+        }
+        if(flappyBirdFeet >= pair.groundPipe.y) {
+          return true;
+        }
+      }
+      return false;
     },
     pairs: [],
     update() {
@@ -233,10 +255,14 @@ function createPipe() {
         })
       }
 
-      pipe.pairs.forEach(function(pairs){
-        pairs.x = pairs.x - 2;
+      pipe.pairs.forEach(function(pair){
+        pair.x = pair.x - 2;
 
-        if(pairs.x + pipe.width <= 0) {
+        if(pipe.hasCollisionWithFlappyBird(pair)) {
+          changeScreen(SCREENS.START)
+        }
+
+        if(pair.x + pipe.width <= 0) {
           pipe.pairs.shift();
         }
       })
@@ -257,21 +283,20 @@ const SCREENS = {
     draw() {
       background.draw();
       globals.flappyBird.draw();
-      globals.pipe.draw();
       globals.ground.draw();
-      //startScreen.draw();
+      startScreen.draw();
     },
     click() {
       changeScreen(SCREENS.GAME);
     },
     update() {
       globals.ground.update();
-      globals.pipe.update();
     },
   },
   GAME: {
     draw() {
       background.draw();
+      globals.pipe.draw();
       globals.ground.draw();
       globals.flappyBird.draw();
     },
@@ -279,6 +304,8 @@ const SCREENS = {
       globals.flappyBird.jump();
     },
     update() {
+      globals.pipe.update();
+      globals.ground.update();
       globals.flappyBird.update();
     },
   },
